@@ -5,7 +5,7 @@ namespace SyntaxTongue.Analyzers
 {
     public class PropertyAnalyzer : BaseAnalyzer
     {
-        public List<SyntaxTongueSentence> Analyze(PropertyDeclarationSyntax propertyDeclaration)
+         public List<SyntaxTongueSentence> Analyze(PropertyDeclarationSyntax propertyDeclaration)
         {
             var sentences = new List<SyntaxTongueSentence>();
 

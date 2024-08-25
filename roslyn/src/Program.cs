@@ -22,6 +22,8 @@ namespace SyntaxTongue
             var linqQueryAnalyzer = new LinqQueryAnalyzer();
             var recordAnalyzer = new RecordAnalyzer();
             var topLevelStatementAnalyzer = new TopLevelStatementAnalyzer();
+            var localFunctionAnalyzer = new LocalFunctionAnalyzer();
+            var variableDeclarationAnalyzer = new VariableDeclarationAnalyzer();
 
             var allSentences = new List<SyntaxTongueSentence>();
 
@@ -53,11 +55,27 @@ namespace SyntaxTongue
                     case GlobalStatementSyntax globalStatement:
                         allSentences.AddRange(topLevelStatementAnalyzer.Analyze(globalStatement));
                         break;
+                    case MethodDeclarationSyntax methodDeclaration:
+                        allSentences.AddRange(methodAnalyzer.Analyze(methodDeclaration));
+                        break;
+                    case LocalFunctionStatementSyntax localFunction:
+                        allSentences.AddRange(localFunctionAnalyzer.Analyze(localFunction));
+                        break;
+                    case VariableDeclarationSyntax variableDeclaration:
+                        allSentences.AddRange(variableDeclarationAnalyzer.Analyze(variableDeclaration));
+                        break;
                 }
             }
 
             var json = JsonSerializer.Serialize(new { sentences = allSentences }, new JsonSerializerOptions { WriteIndented = true });
             Console.WriteLine(json);
+        }
+
+        static bool IsLinqMethodChain(InvocationExpressionSyntax invocation)
+        {
+            var linqMethods = new[] { "Where", "Select", "OrderBy", "GroupBy", "Join", "Skip", "Take", "Count" };
+            return invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
+                   linqMethods.Contains(memberAccess.Name.Identifier.Text);
         }
     }
 }

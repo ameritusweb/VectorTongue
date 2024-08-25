@@ -50,12 +50,13 @@ namespace SyntaxTongue.Analyzers
 
             return expression switch
             {
-                LiteralExpressionSyntax _ => "LITERAL",
-                IdentifierNameSyntax _ => "IDENTIFIER",
+                LiteralExpressionSyntax literal => "LITERAL",
+                IdentifierNameSyntax identifier => "IDENTIFIER",
                 BinaryExpressionSyntax binary => $"{GeneralizeExpression(binary.Left)} OPERATOR {GeneralizeExpression(binary.Right)}",
-                InvocationExpressionSyntax invocation => $"{GeneralizeExpression(invocation.Expression)} LPAREN {string.Join(" ", invocation.ArgumentList.Arguments.Select(GeneralizeExpression))} RPAREN",
+                InvocationExpressionSyntax invocation => GeneralizeInvocation(invocation),
                 MemberAccessExpressionSyntax memberAccess => $"{GeneralizeExpression(memberAccess.Expression)} DOT {memberAccess.Name}",
                 ObjectCreationExpressionSyntax objectCreation => $"NEW {GeneralizeType(objectCreation.Type)} {(objectCreation.Initializer != null ? "INITIALIZER" : "")}",
+                ImplicitObjectCreationExpressionSyntax implicitObjectCreation => $"NEW LPAREN {string.Join(" ", implicitObjectCreation.ArgumentList.Arguments.Select(GeneralizeExpression))} RPAREN",
                 ConditionalAccessExpressionSyntax conditionalAccess => $"{GeneralizeExpression(conditionalAccess.Expression)} QUESTION_DOT {GeneralizeExpression(conditionalAccess.WhenNotNull)}",
                 PostfixUnaryExpressionSyntax postfixUnary when postfixUnary.OperatorToken.IsKind(SyntaxKind.ExclamationToken) => $"{GeneralizeExpression(postfixUnary.Operand)} BANG",
                 IsPatternExpressionSyntax isPattern => $"{GeneralizeExpression(isPattern.Expression)} IS {GeneralizePattern(isPattern.Pattern)}",
@@ -63,6 +64,8 @@ namespace SyntaxTongue.Analyzers
                 LambdaExpressionSyntax lambda => GeneralizeLambda(lambda),
                 SwitchExpressionSyntax switchExpression => GeneralizeSwitchExpression(switchExpression),
                 WithExpressionSyntax withExpression => $"{GeneralizeExpression(withExpression.Expression)} WITH {GeneralizeExpression(withExpression.Initializer)}",
+                AnonymousObjectCreationExpressionSyntax anonymousObject => $"NEW ANONYMOUS_OBJECT LBRACE {string.Join(" ", anonymousObject.Initializers.Select(i => $"{i.NameEquals?.Name ?? "IDENTIFIER"} ASSIGN {GeneralizeExpression(i.Expression)}"))} RBRACE",
+                TupleExpressionSyntax tuple => $"TUPLE LPAREN {string.Join(" ", tuple.Arguments.Select(a => GeneralizeExpression(a.Expression)))} RPAREN",
                 _ => "EXPRESSION"
             };
         }
@@ -77,6 +80,10 @@ namespace SyntaxTongue.Analyzers
                 VarPatternSyntax _ => "VAR_PATTERN",
                 RecursivePatternSyntax recursivePattern => $"RECURSIVE_PATTERN {GeneralizeType(recursivePattern.Type)} {string.Join(" ", recursivePattern.PropertyPatterns.Select(p => $"{p.NameColon.Name} COLON {GeneralizePattern(p.Pattern)}"))}",
                 RelationalPatternSyntax relationalPattern => $"RELATIONAL_PATTERN {relationalPattern.OperatorToken.Text} {GeneralizeExpression(relationalPattern.Expression)}",
+                OrPatternSyntax orPattern => $"OR_PATTERN {GeneralizePattern(orPattern.Left)} OR {GeneralizePattern(orPattern.Right)}",
+                AndPatternSyntax andPattern => $"AND_PATTERN {GeneralizePattern(andPattern.Left)} AND {GeneralizePattern(andPattern.Right)}",
+                NotPatternSyntax notPattern => $"NOT_PATTERN NOT {GeneralizePattern(notPattern.Pattern)}",
+                ListPatternSyntax listPattern => $"LIST_PATTERN LBRACKET {string.Join(" ", listPattern.Patterns.Select(GeneralizePattern))} RBRACKET",
                 _ => "PATTERN"
             };
         }
@@ -140,7 +147,8 @@ namespace SyntaxTongue.Analyzers
             var body = lambda.ExpressionBody != null
                 ? GeneralizeExpression(lambda.ExpressionBody)
                 : "BLOCK";
-            return $"LAMBDA LPAREN {string.Join(" ", parameters)} RPAREN LAMBDA_ARROW {body}";
+            var modifiers = lambda.Modifiers.Any(SyntaxKind.StaticKeyword) ? "STATIC " : "";
+            return $"{modifiers}LAMBDA LPAREN {string.Join(" ", parameters)} RPAREN LAMBDA_ARROW {body}";
         }
 
         protected string GeneralizeSwitchExpression(SwitchExpressionSyntax switchExpression)

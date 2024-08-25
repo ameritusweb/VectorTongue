@@ -46,50 +46,54 @@ public class LinqQueryAnalyzer : BaseAnalyzer
     }
 
     public List<SyntaxTongueSentence> AnalyzeMethodChain(InvocationExpressionSyntax invocation)
-    {
-        var sentences = new List<SyntaxTongueSentence>();
-        var currentExpression = invocation;
-
-        while (currentExpression != null)
         {
-            if (currentExpression.Expression is MemberAccessExpressionSyntax memberAccess)
-            {
-                sentences.Add(new SyntaxTongueSentence
-                {
-                    OriginalCode = currentExpression.ToString(),
-                    SyntaxTongue = $"LINQ_METHOD {memberAccess.Name} LPAREN {AnalyzeLinqMethodArguments(currentExpression.ArgumentList)} RPAREN"
-                });
+            var sentences = new List<SyntaxTongueSentence>();
+            var currentExpression = invocation;
 
-                currentExpression = memberAccess.Expression as InvocationExpressionSyntax;
-            }
-            else
+            while (currentExpression != null)
             {
-                sentences.Add(new SyntaxTongueSentence
+                if (currentExpression.Expression is MemberAccessExpressionSyntax memberAccess)
                 {
-                    OriginalCode = currentExpression.ToString(),
-                    SyntaxTongue = GeneralizeExpression(currentExpression)
-                });
-                break;
+                    sentences.Add(new SyntaxTongueSentence
+                    {
+                        OriginalCode = currentExpression.ToString(),
+                        SyntaxTongue = $"LINQ_METHOD {memberAccess.Name} LPAREN {AnalyzeLinqMethodArguments(currentExpression.ArgumentList)} RPAREN"
+                    });
+
+                    currentExpression = memberAccess.Expression as InvocationExpressionSyntax;
+                }
+                else
+                {
+                    sentences.Add(new SyntaxTongueSentence
+                    {
+                        OriginalCode = currentExpression.ToString(),
+                        SyntaxTongue = GeneralizeExpression(currentExpression)
+                    });
+                    break;
+                }
             }
+
+            sentences.Reverse(); // Reverse to get the correct order of method calls
+            return sentences;
         }
 
-        sentences.Reverse(); // Reverse to get the correct order of method calls
-        return sentences;
-    }
-
-    private string AnalyzeLinqMethodArguments(ArgumentListSyntax argumentList)
-    {
-        return string.Join(" ", argumentList.Arguments.Select(arg =>
+        private string AnalyzeLinqMethodArguments(ArgumentListSyntax argumentList)
         {
-            if (arg.Expression is LambdaExpressionSyntax lambda)
+            return string.Join(" ", argumentList.Arguments.Select(arg =>
             {
-                return GeneralizeLambda(lambda);
-            }
-            else if (arg.Expression is SimpleLambdaExpressionSyntax simpleLambda)
-            {
-                return $"LAMBDA LPAREN IDENTIFIER RPAREN LAMBDA_ARROW {GeneralizeExpression(simpleLambda.Body)}";
-            }
-            return GeneralizeExpression(arg.Expression);
-        }));
-    }
+                if (arg.Expression is LambdaExpressionSyntax lambda)
+                {
+                    return GeneralizeLambda(lambda);
+                }
+                else if (arg.Expression is SimpleLambdaExpressionSyntax simpleLambda)
+                {
+                    return $"LAMBDA LPAREN IDENTIFIER RPAREN LAMBDA_ARROW {GeneralizeExpression(simpleLambda.Body)}";
+                }
+                else if (arg.Expression is MemberAccessExpressionSyntax memberAccess)
+                {
+                    return $"METHOD_GROUP {GeneralizeExpression(memberAccess.Expression)} DOT {memberAccess.Name}";
+                }
+                return GeneralizeExpression(arg.Expression);
+            }));
+        }
 }

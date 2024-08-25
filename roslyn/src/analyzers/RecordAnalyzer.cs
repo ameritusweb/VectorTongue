@@ -7,11 +7,12 @@ public class RecordAnalyzer : BaseAnalyzer
         sentences.AddRange(AnalyzeAttributes(recordDeclaration.AttributeLists));
 
         var recordKind = recordDeclaration.ClassOrStructKeyword.IsKind(SyntaxKind.ClassKeyword) ? "CLASS" : "STRUCT";
+        var modifiers = GeneralizeModifiers(recordDeclaration.Modifiers);
 
         sentences.Add(new SyntaxTongueSentence
         {
             OriginalCode = recordDeclaration.Identifier.ToString(),
-            SyntaxTongue = $"RECORD {recordKind} IDENTIFIER"
+            SyntaxTongue = $"{modifiers} RECORD {recordKind} IDENTIFIER"
         });
 
         if (recordDeclaration.ParameterList != null)
