@@ -1,0 +1,28 @@
+{
+    "name": "javascript-syntax-tongue-converter",
+    "version": "1.0.0",
+    "description": "A TypeScript-based tool to convert JavaScript code into a 'Syntax Tongue' representation.",
+    "main": "dist/index.js",
+    "scripts": {
+      "build": "tsc",
+      "start": "node dist/index.js",
+      "watch": "tsc --watch",
+      "test": "echo \"No test specified\" && exit 0"
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/yourusername/javascript-syntax-tongue-converter.git"
+    },
+    "keywords": [
+      "typescript",
+      "javascript",
+      "syntax",
+      "converter",
+      "ast"
+    ],
+    "author": "ameritusweb",
+    "license": "LGPL-2.1-or-later",
+    "devDependencies": {
+      "typescript": "^5.5.4"
+    }
+  }
