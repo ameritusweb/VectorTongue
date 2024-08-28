@@ -5,6 +5,8 @@ VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vectorization", "Vectorization.csproj", "{97D06604-A28E-4B1B-B511-6F2ED7FF56E2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vectorization.Test", "..\Vectorization.Test\Vectorization.Test.csproj", "{C3A1344A-D2D2-474F-9B8F-99A19EBFA941}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{97D06604-A28E-4B1B-B511-6F2ED7FF56E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97D06604-A28E-4B1B-B511-6F2ED7FF56E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97D06604-A28E-4B1B-B511-6F2ED7FF56E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3A1344A-D2D2-474F-9B8F-99A19EBFA941}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3A1344A-D2D2-474F-9B8F-99A19EBFA941}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3A1344A-D2D2-474F-9B8F-99A19EBFA941}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3A1344A-D2D2-474F-9B8F-99A19EBFA941}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
